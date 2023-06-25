@@ -13,6 +13,7 @@
 #include <stdint.h>
 #include <omp.h>
 #include "../../support/timer.h"
+#include "./dram_ap.h"
 
 static uint64_t *A;
 static uint64_t *B;
@@ -20,9 +21,9 @@ static uint64_t *C;
 static uint64_t *C2;
 static int pos;
 
-bool pred(const uint64_t x){
-  return (x % 2) == 0;
-}
+// bool pred(const uint64_t x){
+//   return (x % 2) == 0;
+// }
 
 
 void  *create_test_file(unsigned int nr_elements) {
@@ -32,12 +33,19 @@ void  *create_test_file(unsigned int nr_elements) {
     B = (uint64_t*) malloc(nr_elements * sizeof(uint64_t));
     C = (uint64_t*) malloc(nr_elements * sizeof(uint64_t));
 
-    printf("nr_elements\t%u\t", nr_elements);
+    //printf("nr_elements\t%u\t", nr_elements);
     for (int i = 0; i < nr_elements; i++) {
         //A[i] = (unsigned int) (rand());
         A[i] = i+1;
         B[i] = 0;
     }
+}
+
+static void print_res(uint64_t* res, unsigned int nr_elements) {
+    for (int i = 0; i < nr_elements; i++) {
+        printf("%ld\t", res[i]);
+    }
+    printf("\n");
 }
 
 /**
@@ -51,6 +59,7 @@ static int select_host(int size, int t) {
     #pragma omp parallel for
     for(int my = 1; my < size; my++) {
         if(!pred(A[my])) {
+            printf("%ld\t", A[my]);
             int p;
             #pragma omp atomic update
             pos++;
@@ -58,7 +67,25 @@ static int select_host(int size, int t) {
             C[p] = A[my];
         }
     }
+    printf("\nPrinting A\n");
+    print_res(A, size);
+    printf("\n\n CPU Result\n\n");
+    print_res(C, pos+1);
     return pos;
+}
+
+static int select_pim(int size, int bit_len) {
+    mm_data_t curr;
+    dram_ap_valloc(&curr.matrix_A, 0, size, bit_len);
+    dram_ap_valloc(&curr.matrix_out, 0, size, bit_len);
+    curr.pos = 0;
+    for (int i = 0; i < size; i+=bit_len) {
+        dram_ap_vcpy(curr.matrix_A, A, i, bit_len);
+        dram_ap_vcmp(curr.matrix_A, curr.matrix_out, &curr.pos, i, bit_len);
+    }
+    printf("\n\n PIM Result\n\n");
+    print_res(curr.matrix_out, curr.pos);
+    return curr.pos;
 }
 
 // Params ---------------------------------------------------------------------
@@ -135,6 +162,8 @@ int main(int argc, char **argv) {
     total_count = select_host(file_size, p.n_threads);
 
     stop(&timer, 0);
+
+    int to = select_pim(file_size, 4);
 
     printf("Total count = %d\t", total_count);
 

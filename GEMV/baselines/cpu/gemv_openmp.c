@@ -9,11 +9,11 @@
 
 int main(int argc, char *argv[])
 {
-  // const size_t rows = 20480;
-  // const size_t cols = 8192;
+  const size_t rows = 20480;
+  const size_t cols = 8192;
 
-  const size_t rows = 30;
-  const size_t cols = 40;
+  // const size_t rows = 30;
+  // const size_t cols = 40;
 
   double **A, *b, *x;
 
@@ -56,47 +56,47 @@ int main(int argc, char *argv[])
 
     /* START DRAMAP */
 
-  // int n_ranks = 16;
-  // int n_banks = 8;
-  // int n_sa = 2;
-  // int n_col = 262144;
+        // int n_ranks = 16; //
+        // int n_banks = 8; //
+        // int n_sa = 2; //
+        // int n_col = 262144; //
 
-  // int n_tasklets = n_ranks * n_banks * n_sa
-  // int rows_per_tasklet = rows / (n_tasklets); // distribute matrix rows evenly to each RLU vector tasklet
+        // int n_tasklets = n_ranks * n_banks * n_sa //
+        // int rows_per_tasklet = rows / (n_tasklets); // distribute matrix rows evenly to each RLU vector tasklet //
 
-  double *output_row; // host var
-  output_row = (double*) malloc(sizeof(double)*rows);
+  // double *output_row; // host var
+  // output_row = (double*) malloc(sizeof(double)*rows);
 
-  double *mat_row;
-  double *v_row;
-  double *res_row;
+  // double *mat_row;
+  // double *v_row;
+  // double *res_row;
 
-  dram_ap_valloc(&mat_row, cols);
-  dram_ap_valloc(&res_row, cols);
-  dram_ap_valloc(&v_row, cols);
+  // dram_ap_valloc(&mat_row, cols);
+  // dram_ap_valloc(&res_row, cols);
+  // dram_ap_valloc(&v_row, cols);
 
-  for (size_t r = 0; r < 30; r++) {
+  // for (size_t r = 0; r < 30; r++) {
 
-    dram_ap_fld(A, mat_row, r, cols);
-    dram_ap_vld(x, v_row, cols);
+  //   dram_ap_fld(A, mat_row, r, cols);
+  //   dram_ap_vld(x, v_row, cols);
 
-    dram_ap_vmul(res_row, mat_row, v_row, cols);
-    double acc = 0.0;
-    dram_ap_vredsum(&acc, res_row, cols);
-    output_row[r] = acc;
+  //   dram_ap_vmul(res_row, mat_row, v_row, cols);
+  //   double acc = 0.0;
+  //   dram_ap_vredsum(&acc, res_row, cols);
+  //   output_row[r] = acc;
 
     // printf("acc: %f\n ", acc);
     
-  }
-
-  // sanity check
-  // for (int i = 0; i < 30; i++) {
-  //   printf("output_row[%d]: %f, b[%d]: %f \n", i, output_row[i], i, b[i]);
   // }
-  free(mat_row);
-  free(v_row);
-  free(res_row);
-  free(output_row);
+
+      // sanity check
+      // for (int i = 0; i < 30; i++) {
+      //   printf("output_row[%d]: %f, b[%d]: %f \n", i, output_row[i], i, b[i]);
+      // }
+  // free(mat_row);
+  // free(v_row);
+  // free(res_row);
+  // free(output_row);
 
   /* END DRAMAP */
 
@@ -106,7 +106,7 @@ int main(int argc, char *argv[])
   print_vec(b, rows);
 #endif
 
-  printf("sum(x) = %f, sum(Ax) = %f\n", sum_vec(x,cols), sum_vec(b,rows));
+  printf("rows: %ld, cols: %ld, sum(x) = %f, sum(Ax) = %f\n", rows, cols, sum_vec(x,cols), sum_vec(b,rows));
   return 0;
 }
 

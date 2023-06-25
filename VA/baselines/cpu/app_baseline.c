@@ -56,8 +56,8 @@ static void vector_addition_host(unsigned int nr_elements, int t) {
     for (int i = 0; i < nr_elements; i++) {
         C[i] = A[i] + B[i];
     }
-    printf("+++++++++++++++++CPU+++++++++++++++++++++++\n");
-    print_res(C, nr_elements);
+    // printf("+++++++++++++++++CPU+++++++++++++++++++++++\n");
+    // print_res(C, nr_elements);
 }
 
 /**
@@ -105,7 +105,8 @@ void usage() {
 
 struct Params input_params(int argc, char **argv) {
     struct Params p;
-    p.input_size    = 32;//16777216;
+    // p.input_size    = 32;//16777216;
+    p.input_size    = 16777216;
     p.n_warmup      = 1;
     p.n_reps        = 3;
     p.n_threads     = 5;
@@ -148,7 +149,7 @@ int main(int argc, char **argv) {
     start(&timer, 0, 0);
 
     vector_addition_host(file_size, p.n_threads);
-    vector_addition_pim(file_size, 4);
+    // vector_addition_pim(file_size, 4);
     
     stop(&timer, 0);
     printf("Kernel ");
